@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+<h1>Translator</h1>
+<form action="" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+<div id="msg" class="alert" style="height:50px;"></div>
+<div id="DropFrame" class="jumbotron">
+  <h3>ここにファイルをドラッグ＆ドロップしてください</h3>
+  <div class="center-block">
+  <div class="drag-drop-buttons"><input class="btn btn-lg" id="src_file" type="file" value="ファイルを選択" name="src_file"></div>
+</div></div>
+</form>
+<button id="upload-btn" type="button" class="btn btn-dark btn-lg btn-block">アップロード</button>
+<ui>
+{% for f in files %}
+ <li><a href="">{{f.src_file.name}}</a></li>
+{% endfor %}
+</ui>
+
+<script type="text/javascript">
+  var fileArea = document.getElementById('drag-drop-area');
+  var fileInput = document.getElementById('src_file');
+
+  fileArea.addEventListener('dragover', function(evt){
+    evt.preventDefault();
+    fileArea.classList.add('dragover');
+  });
+
+  fileArea.addEventListener('dragleave', function(evt){
+      evt.preventDefault();
+      fileArea.classList.remove('dragover');
+  });
+  fileArea.addEventListener('drop', function(evt){
+      evt.preventDefault();
+      fileArea.classList.remove('dragenter');
+      var files = evt.dataTransfer.files;
+      fileInput.files = files;
+  });
+</script>
+<script
+src="https://code.jquery.com/jquery-3.3.1.min.js"
+integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+crossorigin="anonymous"></script>
+<script>
+  $(document).on('click','#upload-btn',function(e){
+    $('#msg').attr('class','alert')
+    if ($('#src_file').val()=='') {
+      $('#msg').attr('class','alert alert-warning').text('ファイルを選択してください')
+      return false
+    } else {
+      var fd = new FormData();
+      fd.append('id',GetCookie('id'))
+      fd.append('file',$('#src_file').prop('files')[0])
+      
+      $.ajax({
+        url: '{% url "upload_file" %}',
+        type: 'POST',
+        headers: {'X-CSRFToken':'{{ csrf_token }}'},
+        data: fd,
+        processData: false,
+        contentType: false,
+      }).done(function(res){
+        if (res['result']){
+          $('#msg').attr('class','alert alert-success').text('アップロードしました')
+        } else {
+          $('#msg').attr('class','alert alert-danger').text(res['msg'])
+        }
+      }).fail(function(res){
+        $('#msg').attr('class','alert alert-danger').text('アップロードに失敗しました')
+      })
+    }
+  });
+  
+  
+  function GetCookie( name )
+  {
+    var result = null;
+    var cookieName = name + '=';
+    var allcookies = document.cookie;
+
+    var position = allcookies.indexOf( cookieName );
+    if( position != -1 )
+    {
+        var startIndex = position + cookieName.length;
+        var endIndex = allcookies.indexOf( ';', startIndex );
+        if( endIndex == -1 )
+        {
+            endIndex = allcookies.length;
+        }
+        result = decodeURIComponent(
+            allcookies.substring( startIndex, endIndex ) );
+    }
+    return result;
+}
+</script>
+
+
+
+{% endblock %}
