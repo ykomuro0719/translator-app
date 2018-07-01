@@ -15,7 +15,7 @@
 <button id="upload-btn" type="button" class="btn btn-dark btn-lg btn-block">アップロード</button>
 <ui>
 {% for f in files %}
- <li><a href="">{{f.src_file.name}}</a></li>
+ <li><a href="{{ f.src_file.url }}">{{f.src_file.name}}</a></li>
 {% endfor %}
 </ui>
 
@@ -45,15 +45,18 @@ integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 crossorigin="anonymous"></script>
 <script>
   $(document).on('click','#upload-btn',function(e){
+    var regexp = /^.+\.[pdf|mobi|epub]/i
     $('#msg').attr('class','alert')
     if ($('#src_file').val()=='') {
       $('#msg').attr('class','alert alert-warning').text('ファイルを選択してください')
+      return false
+    } else if (!regexp.test($('#src_file').val())){
+      $('#msg').attr('class','alert alert-warning').text('対象外のファイルです')
       return false
     } else {
       var fd = new FormData();
       fd.append('id',GetCookie('id'))
       fd.append('file',$('#src_file').prop('files')[0])
-      
       $.ajax({
         url: '{% url "upload_file" %}',
         type: 'POST',
@@ -72,8 +75,6 @@ crossorigin="anonymous"></script>
       })
     }
   });
-  
-  
   function GetCookie( name )
   {
     var result = null;

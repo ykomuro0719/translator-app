@@ -21,9 +21,9 @@ def upload_file(request):
   if request.method == 'POST':
     #form = UploadFileForm(request.POST,request.FILES,instance=obj)
     if file_valid(request.FILES.get('file')):
-      obj.src_file = request.FILES.get('file')
       obj.user_id = request.POST.get('id')
-      obj.save()  
+      obj.src_file = request.FILES.get('file')
+      obj.save()
       result_set = {'result':True,'msg':'アップロードが完了しました'}
     else:
       result_set = {'result':False,'msg':'不正なファイルです'}
